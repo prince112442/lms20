@@ -54,7 +54,7 @@
   </form>
 
   <script>
-    const API_BASE_URL = "https://YOUR-BACKEND-DOMAIN/api"; // same as api.js
+    const API_BASE_URL = "https://lms20-xk6g.onrender.com/api"; // same as api.js
 
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -62,17 +62,36 @@
       const password = document.getElementById("password").value;
       const errorMsg = document.getElementById("errorMsg");
 
+      errorMsg.style.display = "none";
+
       try {
         const res = await fetch(`${API_BASE_URL}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password })
         });
-        if (!res.ok) throw new Error("Login failed");
+
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 400) {
+            errorMsg.textContent = "Invalid email or password.";
+          } else {
+            errorMsg.textContent = `Login failed (server returned ${res.status}).`;
+          }
+          errorMsg.style.display = "block";
+          return;
+        }
+
         const data = await res.json(); // expects { token: "..." }
+        if (!data.token) {
+          errorMsg.textContent = "Login succeeded but no token was returned by the server.";
+          errorMsg.style.display = "block";
+          return;
+        }
+
         localStorage.setItem("lms_token", data.token);
         window.location.href = "index.html";
       } catch (err) {
+        errorMsg.textContent = "Could not reach the server. Check your connection or try again.";
         errorMsg.style.display = "block";
       }
     });

@@ -9,6 +9,17 @@
 </head>
 <body>
 
+<script>
+  // Auth guard — must run before anything else on the dashboard.
+  // If there's no token, bounce to the login page immediately.
+  (function () {
+    const token = localStorage.getItem("lms_token");
+    if (!token) {
+      window.location.replace("login.html");
+    }
+  })();
+</script>
+
 <div class="app">
 
   <!-- ===== Sidebar ===== -->
@@ -178,5 +189,11 @@
 
 <script src="js/api.js"></script>
 <script src="js/app.js"></script>
+<script>
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("lms_token");
+    window.location.href = "login.html";
+  });
+</script>
 </body>
 </html>
